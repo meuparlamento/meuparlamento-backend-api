@@ -44,7 +44,7 @@ pip install -r requirements.txt
 
 ## Running app.py
 
-This project is based on a severless architecture framework called [Chalice](https://github.com/aws/chalice/), a Python Serverless Microframework for AWS. Chalice allows us to deploy our endpoints using Amazon Lambda API. For more information please check https://github.com/aws/chalice/. 
+This project is based on a microframework called [Chalice](https://github.com/aws/chalice/), a Python Serverless Microframework for AWS. Chalice allows you to quickly create and deploy applications that use [Amazon Lambda](https://aws.amazon.com/lambda/). For more information on how to setup and deploy this project to Amazon AWS please check https://github.com/aws/chalice/. 
 
 In order to run it locally just type:
 
