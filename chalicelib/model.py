@@ -2,6 +2,7 @@
 
 from random import shuffle
 from datetime import datetime
+from datetime import timedelta
 import pymongo
 import chalicelib.utils
 
@@ -80,6 +81,26 @@ class DataRepository(object):
                                                         {'$sample': { 'size': sample_size } }
                                                     ], explain=False)
         return res['cursor']['firstBatch']
+
+    def show_agenda(self, date_agenda):
+        """Return agenda for the day with a list of proposals
+        """    
+       
+        # FIXME dataVotacao is timestamp in the database
+        ts_agenda = date_agenda.timestamp() * 1000
+
+        # add one day to find the timestamp interval for current date
+        ts_agenda_next_day = (date_agenda + timedelta(days=1)).timestamp() * 1000
+        
+        query = {
+            "dataVotacao":{"$gte":ts_agenda, "$lte":ts_agenda_next_day}
+            }
+
+        recent_sampling = self.mongo_conn[self.db_name]["agenda"].find(query)                                                                    
+        
+        # convert proposals format
+        final_sampling = [chalicelib.utils.convert_doc_to_app_protocol(row) for row in recent_sampling]
+        return final_sampling
 
     def recent_batch(self, batch_size=10):
         """Return a batch with recent proposals

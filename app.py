@@ -56,6 +56,37 @@ def register_device():
         app.log.error("failed to register notification device")
         raise BadRequestError('Failed to register device. Unable to support notifications for this device')
 
+@app.route('/proposals/agenda/today')
+def show_agenda_today():
+    return show_agenda_at(datetime.now())
+
+@app.route('/proposals/agenda/at/{date_agenda}')
+def show_agenda_at(date_agenda):
+    """Return agenda for the day
+    """    
+    
+    try:
+        date_agenda = datetime.strptime(date_agenda,'%Y%m%d')        
+    except:
+        date_agenda = datetime.now()    
+
+    app.log.debug("get agenda {}".format(date_agenda))
+
+    try:
+        # generate recent sampling
+        my_batch = data_repo.show_agenda(date_agenda)
+
+        response = json.dumps({"data":my_batch}).encode('utf-8')
+        payload = gzip.compress(response)
+        return Response(status_code=200,
+                        body=payload,
+                        headers={'Content-Type': 'application/json',
+                                'Content-Encoding': 'gzip'})
+    except Exception as e:
+        app.log.error("failed to get proposals batch")
+        raise BadRequestError('Oops. Something bad happened :( If error persists, please contact system admin')
+
+
 @app.route('/proposals/recent/{batch_size}')
 def generate_proposals_recent(batch_size):
     """Return a batch with recent proposals

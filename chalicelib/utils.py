@@ -37,27 +37,34 @@ def convert_doc_to_app_protocol(row):
     doc = {
         "IDProposal":row["BID"],
         "Description":row["title"],
-        "Result":row["resultadoFinal"],
         "LinkPdf":row["pdfLink"],
         "VoteDate":datetime.fromtimestamp(row["dataVotacao"]/1000).strftime("%Y-%m-%d"),
         "VoteYear":row["anoVotacao"],
         "ProposedBy":row["proposedBy"],
         "url":row["url"],
-        "Comissions":row["comissoes"],
+        
         "Summary":row["metadata"]["proposal_summary"],
     }
+
 
     if(len(row["authors"]) > 0):
         doc["ProposedByAuthor"] = row["authors"][0]["name"]
         doc["ProposedByAuthorBioURL"] = row["authors"][0]["bioURL"]
 
-    doc["PSD"] = decode_vote("PSD", row)
-    doc["PS"] = decode_vote("PS", row)
-    doc["CDS_PP"] = decode_vote("CDS_PP".replace("_","-"), row)
-    doc["PCP"] = decode_vote("PCP", row)
-    doc["BE"] = decode_vote("BE", row)
-    doc["PEV"] = decode_vote("PEV", row)
-    doc["PAN"] = decode_vote("PAN", row)
+    if("resultadoFinal" in row):
+        doc["Result"] = row["resultadoFinal"]
+
+        # assigned comissions
+        doc["Comissions"] = row["comissoes"]
+
+        # FIXME: support all parties    
+        doc["PSD"] = decode_vote("PSD", row)
+        doc["PS"] = decode_vote("PS", row)
+        doc["CDS_PP"] = decode_vote("CDS_PP".replace("_","-"), row)
+        doc["PCP"] = decode_vote("PCP", row)
+        doc["BE"] = decode_vote("BE", row)
+        doc["PEV"] = decode_vote("PEV", row)
+        doc["PAN"] = decode_vote("PAN", row)
 
     # FIXME: solucao paliativa para o link dos documentos de propostas vinda do arquivo. 
     # ignora versao do arquivo e busca url original do pdf. tentar solucionar essa questao com o suporte do arquivo.pt             
