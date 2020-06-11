@@ -5,6 +5,7 @@ from datetime import datetime
 import pymongo
 import chalicelib.utils
 
+# weigths should be in the database 
 LIKELIHOOD_WEIGHT_GOVERNMENT = 0.6
 LIKELIHOOD_WEIGHT_OPPOSITION = 0.4
 
@@ -79,6 +80,26 @@ class DataRepository(object):
                                                         {'$sample': { 'size': sample_size } }
                                                     ], explain=False)
         return res['cursor']['firstBatch']
+
+    def recent_batch(self, batch_size=10):
+        """Return a batch with recent proposals
+
+        :batch_size: An integer, max number of proposals to return
+        """    
+        
+        query = {
+            "metadata.num_chars":{"$lte":150}, 
+            "metadata.readability_score": 0
+            }
+        
+        recent_sampling = self.mongo_conn[self.db_name]["proposals"].find(query) \
+                                                                    .sort([("dataVotacao",pymongo.DESCENDING)]) \
+                                                                    .limit(batch_size)
+        
+        # convert proposals format
+        final_sampling = [chalicelib.utils.convert_doc_to_app_protocol(row) for row in recent_sampling]
+        
+        return final_sampling
 
     def sampling_batch(self, batch_size=10):    
         """Return a batch with random proposals

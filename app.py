@@ -56,6 +56,29 @@ def register_device():
         app.log.error("failed to register notification device")
         raise BadRequestError('Failed to register device. Unable to support notifications for this device')
 
+@app.route('/proposals/recent/{batch_size}')
+def generate_proposals_recent(batch_size):
+    """Return a batch with recent proposals
+
+    :batch_size: An integer, max number of proposals to return
+    """    
+
+    app.log.debug("get recent proposals batch. size {}".format(batch_size))
+
+    try:
+        # generate recent sampling
+        my_batch = data_repo.recent_batch(int(batch_size))
+
+        response = json.dumps({"data":my_batch}).encode('utf-8')
+        payload = gzip.compress(response)
+        return Response(status_code=200,
+                        body=payload,
+                        headers={'Content-Type': 'application/json',
+                                'Content-Encoding': 'gzip'})
+    except Exception as e:
+        app.log.error("failed to get proposals batch")
+        raise BadRequestError('Oops. Something bad happened :( If error persists, please contact system admin')
+
 @app.route('/proposals/batch/{batch_size}')
 def generate_proposals_sampling(batch_size):
     """Return a batch with random proposals
